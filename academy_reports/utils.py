@@ -50,7 +50,6 @@ def unnesting(df, explode):
     Unnest columns that contain list creating a new row for each element in the list.
     The number of elements must be the same for all the columns, row by row.
     """
-    print(df)
     length = df[explode[0]].str.len()
     idx = df.index.repeat(length)
     df1 = pd.concat([
@@ -70,15 +69,11 @@ def unnesting(df, explode):
 def subjects_tags():
     '''Identifies the subject depending on the tag
      ECOHAB reads tags with reversed order by pairs'''
-    all_subjects = ['man', 'T1', 'T2', 'T3',
-                    'A41', 'A42', 'A43', 'A44', 'A45', 'A46', 'A47', 'A48', 'A49', 'A50', 'A51', 'A52']
-    all_mv_tags = ['041A9DB979', '041A9C89B3', '041A9C7958', '0419A8212D',
-                   '0417CA5FDE', '041A9DBD90', '0419A86ECB', '0419A8218D', '0417CA97FA', '0419A8701C',
-                   '041A9D7BE0', '0419A822D2', '041A9DBDF9', '041A9DB349', '0419A81BFB', '041A9D86C5']
+    all_subjects = ['ciri', 'gal', 'joy', 'luna', 'sorrel', 'sparky']
+    all_mv_tags = ['041AFD256C', '041AFD5192', '041AFA3C87', '041AFA179E',
+                   '041AFD578A', '041AFD1C27']
     all_colors = ['lightsteelblue', 'mediumseagreen', 'greenyellow', 'salmon',
-              'yellow', 'orange', 'tomato', 'crimson', 'mediumvioletred',
-              'darkorchid', 'darkblue', 'royalblue', 'lightskyblue', 'mediumaquamarine',
-              'green', 'yellowgreen']
+              'yellow', 'orange']
 
     all_ecohab_tags = []  # ECOHAB reads tags with reversed order by pairs
     for tag in all_mv_tags:  # loop thought MV tags
@@ -92,27 +87,7 @@ def subjects_tags():
 
 # BASAL WEIGHTS
 def relative_weights(subject, weight):
-    basal_weights = {
-    'A5': '32.68', 'A6': '31.46', 'A7': '30.40', 'A8': '31.38', 'A9': '31.65', 'A10': '27.71', 'A11': '31.20', 'A12': '27.72',
-    'MA1': '31.3', 'MA2': '25.9', 'MA3': '28.2', 'MA4': '27', 'MA5': '30.9',
-    'A13':'23.4', 'A14':'21.63', 'A15':'21.8', 'A16':'21.87', 'A17':'22.7', 'A18':'21.37', 'A19':'23.7', 'A20':'24.1',
-    'MA6': '24.84', 'MA7': '26.48', 'MA8': '27.51', 'MA9': '24', 'MA10': '25',
-    'MA11': '24.84', 'MA12': '26.48', 'MA13': '27.51', 'MA14': '24', 'MA15': '25',
-    'A21':'19.77', 'A22':'20.1', 'A23':'21.1', 'A24':'22.73', 'A25':'21.3','A26':'20.4', 'A27':'21.8','A28':'22.77', 'A29':'22.8', 'A30':'24.1',
-    'A31':'21.9', 'A32':'22', 'A33':'22.1', 'A34':'26.6', 'A35':'22.5','A36':'23.2', 'A37':'21.7','A38':'22.3', 'A39':'22.6', 'A40':'21.6',
-    'A41':'22.6', 'A42':'27.6', 'A43':'23.2', 'A44':'22.2', 'A45':'25.2','A46':'21.4', 'A47':'24.9','A48':'25.6', 'A49':'22.7', 'A50':'23.9',
-    'A51':'23.5', 'A52':'27.2',
-    'A53':'23.4', 'A54':'24.1', 'A55':'23.7','A56':'22.4', 'A57':'23.9','A58':'23.7', 'A59':'21.9', 'A60':'27.5',
-    'A61':'23.9', 'A62':'26.6', 'A63':'28.4',
-    'A64': '26.9', 'A65': '24.5', 'A66': '26.5', 'A67': '26.2', 'A68': '27.6',
-    'A69': '21.4', 'A70': '21.9', 'A71': '23.8', 'A72': '21.7', 'A73': '24.2',
-    'A74': '24.6', 'A75': '26.0', 'A76': '26.0', 'A77': '24.3',
-    'A78':'27.9', 'A79':'26.9', 'A80':'26.1', 'A81':'25.1', 'A82':'27.2',
-    'A83': '26.65', 'A84':'26.3', 'A85':'25.9', 'A86':'25.75', 'A87':'25.6', 'A88':'24.3', 'A89':'25.8', 'A90': '24.3',
-    'A91':'24.7', 'A92':'24.7', 'A93':'22.4', 'A94':'22.5', 'A95':'22.5', 'A96':'22.5', 'A97':'21.5',
-    'B1': '26.6', 'B2': '23.3', 'B3': '26.7', 'B4': '26.6', 'B5': '30.6', 'B6': '29.6', 'B7': '25.2', 'B8': '27.5',
-    'B9': '28.3', 'B10': '28.0', 'B11': '25.7', 'B12': '24.4', 'B13': '25.8', 'B14': '26',
-    'T1': '33' , 'T2':'32.7','T3': '32.6' , 'T4':'32.9', 'T5':'26.7','T6': '27.5' , 'T7':'27.7', 'T8':'22.6', 'T9':'30.9'}
+    basal_weights = {'ciri': '151', 'gal': '165', 'joy': '167', 'luna': '152', 'sorrel': '175', 'sparky': '184'}
 
     for key, value in basal_weights.items():
         if subject == key:
