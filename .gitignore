@@ -1,0 +1,10 @@
+*.swp
+*.pdf
+*.csvdata
+*.ipynb
+*.egg-info/
+__pycache__/
+.idea/
+.spyproject/
+/academy_reports/settings.py
+/reports/
