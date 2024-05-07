@@ -55,9 +55,8 @@ def unnesting(df, explode):
     df1 = pd.concat([
         pd.DataFrame({x: np.concatenate(df[x].values)}) for x in explode], axis=1)
     df1.index = idx
-    finaldf = df1.join(df.drop(explode, 1), how='left')
+    finaldf = df1.join(df.drop(columns=explode), how='left')
     finaldf.reset_index(drop=True, inplace=True)
-
     length2 = [list(range(l)) for l in length]
     length2 = [item + 1 for sublist in length2 for item in sublist]
     name = explode[0] + '_index'

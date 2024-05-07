@@ -206,7 +206,7 @@ def stagetraining_daily (df, save_path, date):
 
     total_acc_ttype = ''
     for key, value in total_acc_dict.items():
-        total_acc_ttype = total_acc_ttype + '  /  Acc ' + str(key) + ': ' + str(int(value * 100)) + "%"
+        total_acc_ttype = total_acc_ttype + '  /  First Acc ' + str(key) + ': ' + str(int(value * 100)) + "%"
 
     ##################### PLOT #####################
 
@@ -230,7 +230,7 @@ def stagetraining_daily (df, save_path, date):
               '  /  Rel. weight: ' + str(round(utils.relative_weights(subject, weight), 2)) + "%" +
               '  /  Reward drunk: ' + str(reward_drunk) + " ul" + '\n')
 
-        s3 = ('Acc global: ' + str(total_acc_first_poke) + '%' + total_acc_ttype + '\n')
+        s3 = ('First Acc global: ' + str(total_acc_first_poke) + '%' + total_acc_ttype + '\n')
 
 
         ### PLOT 0:
@@ -341,8 +341,7 @@ def stagetraining_daily (df, save_path, date):
         x_max = len(ttypes_simple) -0.5
 
         if repoking_bool == True:  # add last poke
-            sns.pointplot(x=last_resp_df.trial_type, y=last_resp_df.correct_bool, ax=axes, ci=68, color='black',
-                          linestyles=["--"])
+            sns.pointplot(x=last_resp_df.trial_type, y=last_resp_df.correct_bool, ax=axes, ci=68, color='black')
         else:
             grouped_df = first_resp_df.groupby('trial_type').agg({'correct_bool': 'mean', 'trial_type_simple': max}).reset_index()
             sns.stripplot(x='trial_type_simple', y='correct_bool', data=grouped_df, order=ttypes_simple, hue="trial_type",
@@ -352,7 +351,7 @@ def stagetraining_daily (df, save_path, date):
             except:
                 pass
         sns.pointplot(x='trial_type_simple', y='correct_bool', data= first_resp_df, order=ttypes_simple,
-                      s=100, ci=68, color='black')
+                      markersize=10, ci=68, color='black')
 
         # axis
         axes.hlines(y=chance_lines, xmin=x_min, xmax=x_max, color=lines_c, linestyle=':', linewidth=1)
@@ -400,7 +399,7 @@ def stagetraining_daily (df, save_path, date):
                      marker='o', markersize=8, err_style="bars", ci=68, ax=axes)
 
         axes.hlines(y=[-correct_th / 2, correct_th / 2], xmin=x_min, xmax=x_max, color=lines_c, linestyle=':', linewidth=1)
-        axes.set_xlabel('$Stimulus \ position\ (x_{t})\ (mm)%$', label_kwargs)
+        axes.set_xlabel('Stimulus \ position\ (x_{t})\ (mm)%', label_kwargs)
         axes.set_ylabel('Error (mm)', label_kwargs)
         if len(first_resp_df.trial_type.unique()) > 1:
             axes.get_legend().remove()
@@ -443,7 +442,7 @@ def stagetraining_daily (df, save_path, date):
         for idx in range(len(x_positions)):
             axes = plt.subplot2grid((50, 50), (16, axes_loc[idx]), rowspan=12, colspan=colspan)
             subset = first_resp_df.loc[first_resp_df['x'] == x_positions[idx]]
-            axes.set_title('$x_{t}\ :%$' + str(x_positions[idx]), fontsize=13, fontweight='bold')
+            axes.set_title('x_{t}\ :%' + str(x_positions[idx]), fontsize=13, fontweight='bold')
             sns.countplot(subset.rt_bins, ax=axes, palette=side_colors)
             axes.set_xlabel('')
             if idx != 0:
@@ -470,7 +469,7 @@ def stagetraining_daily (df, save_path, date):
                                           include_lowest=True)
         sns.stripplot(x='x', y='resp_latency', hue='rt_bins', data=resp_df, dodge=True, ax=axes)
         axes.set_ylabel("Response latency (sec)", label_kwargs)
-        axes.set_xlabel('$Stimulus \ position\ (x_{t})\ (mm)%$', label_kwargs)
+        axes.set_xlabel('Stimulus \ position\ (x_{t})\ (mm)%', label_kwargs)
         axes.set_ylim(0, y_max)
         axes.get_legend().remove()
 

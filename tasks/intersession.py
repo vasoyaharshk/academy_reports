@@ -288,7 +288,7 @@ def intersession(df, save_path_intersesion):
                     sns.countplot(subset.day, hue =subset.r_c, ax=axes, palette=side_colors)
 
                 axes.set_xlabel('Time (Month/Day)')
-                axes.set_ylabel('$x_{t}\ :%$' + str(x_tags[idx]))
+                axes.set_ylabel('x_{t}\ :%' + str(x_tags[idx]))
 
                 #legend
                 if idx != len(x_cats)-1:
@@ -297,7 +297,7 @@ def intersession(df, save_path_intersesion):
                     axes.get_legend().remove()
                 else:
                     handles, labels = axes.get_legend_handles_labels()
-                    axes.legend(handles, x_tags, loc='center', bbox_to_anchor=(1.05, 1.5), title= '$r_{t}\ :%$')
+                    axes.legend(handles, x_tags, loc='center', bbox_to_anchor=(1.05, 1.5), title= 'r_{t}\ :%')
                     axes.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
 
 
