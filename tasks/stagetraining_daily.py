@@ -71,7 +71,7 @@ def stagetraining_daily (df, save_path, date):
     x_positions = df.x.unique().tolist()
     x_positions.sort()
     if mask==3:
-        r_positions = [60, 200, 340]
+        r_positions = [60, 175, 290]
     l_edge = int(min(r_positions) - correct_th)
     r_edge = int(max(r_positions) + correct_th)
     bins_resp = np.linspace(l_edge, r_edge, len(r_positions) + 1)
