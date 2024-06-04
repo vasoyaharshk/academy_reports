@@ -341,6 +341,8 @@ def stagetraining_daily (df, save_path, date):
         x_max = len(ttypes_simple) -0.5
 
         if repoking_bool == True:  # add last poke
+            #sns.pointplot(x=last_resp_df.trial_type, y=last_resp_df.correct_bool, ax=axes, ci=68, color='black', linestyles=["--"])  #linestyles error
+
             sns.pointplot(x=last_resp_df.trial_type, y=last_resp_df.correct_bool, ax=axes, ci=68, color='black')
         else:
             grouped_df = first_resp_df.groupby('trial_type').agg({'correct_bool': 'mean', 'trial_type_simple': max}).reset_index()

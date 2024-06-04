@@ -50,7 +50,6 @@ def intersession(df, save_path_intersesion):
         for col in column_list:
             if col not in df.columns:
                 df[col] = np.nan
-       
 
         ###### CONVERT STRINGS TO LISTS ######
         conversion_list = ['response_x', 'STATE_Incorrect_START', 'STATE_Incorrect_END',
@@ -66,7 +65,6 @@ def intersession(df, save_path_intersesion):
         
 
         ###### RELEVANT COLUMNS ######
-
         # get first & last items
         df['response_first'] = df['response_x'].str[0]
         df['response_last'] = df['response_x'].str[-1]
@@ -318,10 +316,14 @@ def intersession(df, save_path_intersesion):
             except:
                 pass
 
-            sns.pointplot(x='trial_type_simple', y='correct_bool_last', order=ttype_order, ax=axes, s=100, ci=68,
-                          color='black', linestyles=["--"], data=df)
-            sns.pointplot(x='trial_type_simple', y='correct_bool', order=ttype_order, ax=axes, s=100, ci=68,
+            #sns.pointplot(x='trial_type_simple', y='correct_bool_last', order=ttype_order, ax=axes, s=100, ci=68, color='black', linestyles=["--"], data=df)
+            #Gives an error, resolved by removing linestyles=["--"] and replacing s=100 by markersize=10
+
+            sns.pointplot(x='trial_type_simple', y='correct_bool_last', order=ttype_order, ax=axes, markersize=10, ci=68, color='black', data=df)
+
+            sns.pointplot(x='trial_type_simple', y='correct_bool', order=ttype_order, ax=axes, markersize=10, ci=68,
                           color='black', data=df)
+
 
             axes.hlines(y=[chance], xmin=x_min, xmax=x_max, color=lines_c, linestyle=':', linewidth=1)
             axes.fill_between(np.linspace(x_min, x_max, 2), chance, 0, facecolor=lines2_c, alpha=0.3)
@@ -390,11 +392,16 @@ def intersession(df, save_path_intersesion):
             df['start_session'] = df.groupby(['subject', 'session'])['STATE_Start_task_START'].transform('min')
             df['end_session'] = df.groupby(['subject', 'session'])['STATE_Exit_END'].transform('max')
             df['session_lenght'] = (df['end_session'] - df['start_session']) / 60
-            df['current_time'] = df.groupby(['subject', 'session'])['STATE_Start_task_START'].apply(lambda x: (x - x.iloc[0]) / 60)  # MINS
+            df.to_csv('error.csv', index=True)
+            #df['current_time'] = df.groupby(['subject', 'session'])['STATE_Start_task_START'].apply(lambda x: (x - x.iloc[0]) / 60)  # MINS    #This statement is causing errros so rewrote it in a different way.
+            start_times = df.groupby(['subject', 'session'])['STATE_Start_task_START'].transform('first')
+            df['current_time'] = (df['STATE_Start_task_START'] - start_times) / 60
             max_timing = round(df['session_lenght'].max())
+
             max_timing = int(max_timing)
             sess_palette= sns.color_palette('Purples', 5)  # color per day
 
+            print('Here11')
             for idx, day in enumerate(df.day.unique()):
                 subset = df.loc[df['day'] == day]
                 n_sess = len(subset.session.unique())
@@ -404,16 +411,20 @@ def intersession(df, save_path_intersesion):
                     hist_ = stats.cumfreq(subset.current_time, numbins=max_timing, defaultreallimits=(0, max_timing), weights=None)
                 hist_norm = hist_.cumcount / n_sess
                 bins_plt = hist_.lowerlimit + np.linspace(0, hist_.binsize * hist_.cumcount.size, hist_.cumcount.size)
+                print('Here11.1') #ok here
                 sns.lineplot(bins_plt, hist_norm, color=sess_palette[idx], ax=axes, marker='o', markersize=4)
+                print('Here11.2') #Error here
 
             axes.set_ylabel('Cum. nº of trials', label_kwargs)
             axes.set_xlabel('Time (mins)',label_kwargs)
 
+            print('Here13')
             # legend
             lines = [Line2D([0], [0], color=sess_palette[i], marker='o', markersize=7, markerfacecolor=sess_palette[i]) for i in
                      range(len(sess_palette))]
             axes.legend(lines, np.arange(-5, 0, 1), title='Days',  loc='center', bbox_to_anchor=(0.1, 0.85))
 
+            print('Here14')
 
             # SAVING AND CLOSING PAGE
             sns.despine()
