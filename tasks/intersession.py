@@ -409,22 +409,18 @@ def intersession(df, save_path_intersesion):
                     hist_ = stats.cumfreq(subset.current_time, numbins=max_timing, defaultreallimits=(0, subset.current_time.max()), weights=None)
                 except:
                     hist_ = stats.cumfreq(subset.current_time, numbins=max_timing, defaultreallimits=(0, max_timing), weights=None)
+
                 hist_norm = hist_.cumcount / n_sess
                 bins_plt = hist_.lowerlimit + np.linspace(0, hist_.binsize * hist_.cumcount.size, hist_.cumcount.size)
-                print('Here11.1') #ok here
-                sns.lineplot(bins_plt, hist_norm, color=sess_palette[idx], ax=axes, marker='o', markersize=4)
-                print('Here11.2') #Error here
+                sns.lineplot(x=bins_plt, y=hist_norm, color=sess_palette[idx], ax=axes, marker='o', markersize=4)
 
             axes.set_ylabel('Cum. nº of trials', label_kwargs)
             axes.set_xlabel('Time (mins)',label_kwargs)
 
-            print('Here13')
             # legend
             lines = [Line2D([0], [0], color=sess_palette[i], marker='o', markersize=7, markerfacecolor=sess_palette[i]) for i in
                      range(len(sess_palette))]
             axes.legend(lines, np.arange(-5, 0, 1), title='Days',  loc='center', bbox_to_anchor=(0.1, 0.85))
-
-            print('Here14')
 
             # SAVING AND CLOSING PAGE
             sns.despine()
