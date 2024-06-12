@@ -3,9 +3,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
+from datetime import datetime, timedelta
 from academy_reports import utils
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
+import os
+
 
 # PLOT COLORS
 correct_first_c = 'green'
@@ -39,6 +42,7 @@ def stagetraining_daily (df, save_path, date):
     reward_drunk = int(df.reward_drunk.iloc[-1])
     stage = df.stage.iloc[0]
     substage = df.substage.iloc[0]
+    task = df.task.iloc[0]
 
     # BPODCRASH ERROR
     try:
@@ -206,7 +210,7 @@ def stagetraining_daily (df, save_path, date):
 
     total_acc_ttype = ''
     for key, value in total_acc_dict.items():
-        total_acc_ttype = total_acc_ttype + '  /  First Acc ' + str(key) + ': ' + str(int(value * 100)) + "%"
+        total_acc_ttype = total_acc_ttype + '  /  Acc ' + str(key) + ': ' + str(int(value * 100)) + "%"
 
     ##################### PLOT #####################
 
@@ -230,7 +234,7 @@ def stagetraining_daily (df, save_path, date):
               '  /  Rel. weight: ' + str(round(utils.relative_weights(subject, weight), 2)) + "%" +
               '  /  Reward drunk: ' + str(reward_drunk) + " ul" + '\n')
 
-        s3 = ('First Acc global: ' + str(total_acc_first_poke) + '%' + total_acc_ttype + '\n')
+        s3 = ('Acc global: ' + str(total_acc_first_poke) + '%' + total_acc_ttype + '\n')
 
 
         ### PLOT 0:
@@ -341,9 +345,8 @@ def stagetraining_daily (df, save_path, date):
         x_max = len(ttypes_simple) -0.5
 
         if repoking_bool == True:  # add last poke
-            #sns.pointplot(x=last_resp_df.trial_type, y=last_resp_df.correct_bool, ax=axes, ci=68, color='black', linestyles=["--"])  #linestyles error
-
-            sns.pointplot(x=last_resp_df.trial_type, y=last_resp_df.correct_bool, ax=axes, ci=68, color='black')
+            sns.pointplot(x=last_resp_df.trial_type, y=last_resp_df.correct_bool, ax=axes, ci=68, color='black',
+                          linestyles="--")
         else:
             grouped_df = first_resp_df.groupby('trial_type').agg({'correct_bool': 'mean', 'trial_type_simple': max}).reset_index()
             sns.stripplot(x='trial_type_simple', y='correct_bool', data=grouped_df, order=ttypes_simple, hue="trial_type",
@@ -401,7 +404,8 @@ def stagetraining_daily (df, save_path, date):
                      marker='o', markersize=8, err_style="bars", ci=68, ax=axes)
 
         axes.hlines(y=[-correct_th / 2, correct_th / 2], xmin=x_min, xmax=x_max, color=lines_c, linestyle=':', linewidth=1)
-        axes.set_xlabel('Stimulus \ position\ (x_{t})\ (mm)%', label_kwargs)
+        #axes.set_xlabel('$Stimulus \ position\ (x_{t})\ (mm)%$', label_kwargs)
+        axes.set_xlabel(r'$Stimulus \ position\ (x_{t})\ (mm)\%$', **label_kwargs)
         axes.set_ylabel('Error (mm)', label_kwargs)
         if len(first_resp_df.trial_type.unique()) > 1:
             axes.get_legend().remove()
@@ -444,7 +448,8 @@ def stagetraining_daily (df, save_path, date):
         for idx in range(len(x_positions)):
             axes = plt.subplot2grid((50, 50), (16, axes_loc[idx]), rowspan=12, colspan=colspan)
             subset = first_resp_df.loc[first_resp_df['x'] == x_positions[idx]]
-            axes.set_title('x_{t}\ :%' + str(x_positions[idx]), fontsize=13, fontweight='bold')
+            #axes.set_title('$x_{t}\ :%$' + str(x_positions[idx]), fontsize=13, fontweight='bold')
+            axes.set_title(r'x_{t}\ :\ %' + str(x_positions[idx]), fontsize=13, fontweight='bold')
             sns.countplot(subset.rt_bins, ax=axes, palette=side_colors)
             axes.set_xlabel('')
             if idx != 0:
@@ -471,7 +476,14 @@ def stagetraining_daily (df, save_path, date):
                                           include_lowest=True)
         sns.stripplot(x='x', y='resp_latency', hue='rt_bins', data=resp_df, dodge=True, ax=axes)
         axes.set_ylabel("Response latency (sec)", label_kwargs)
-        axes.set_xlabel('Stimulus \ position\ (x_{t})\ (mm)%', label_kwargs)
+        #axes.set_xlabel('$Stimulus \ position\ (x_{t})\ (mm)%$', label_kwargs)
+        axes.set_xlabel(r'$Stimulus \ position\ (x_{t})\ (mm)\%$', **label_kwargs)
+
+        #label_text = r'$Stimulus\ position\ (x_{{t}})\ (mm)\%$'
+        # Use the label_text variable where needed, for example:
+        #axes.set_ylabel(label_text)
+
+
         axes.set_ylim(0, y_max)
         axes.get_legend().remove()
 
@@ -637,84 +649,223 @@ def stagetraining_daily (df, save_path, date):
         plt.close()
 
         ############## PAGE 4 ##############    LAST PAGE ONLY IF OPTO ON
-
-        if df['task'].str.contains('StageTraining_8B_V2').any():
+        if df['task'].str.contains('StageTraining_8B_V2').any() or df['task'].str.contains('StageTraining_10B_V4').any():
             df['opto_bool'] = df['opto_bool'].astype(int)
             if 1 in df['opto_bool'].unique():
 
                 plt.figure(figsize=(11.7, 11.7))  # apaisat
 
-                ### PLOT 1: STIMULUS POSITION ACCURACY BY TRIAL TYPE
-                x_min = 0
-                x_max = 400  # screen size
-                opto_colors=['gray', 'gold']
-                opto_order=[0, 1]
-                y_pos = [0, 17, 35]
+                ### PLOT 1:
+                # Latencies calculation
+                df['init_lat'] = df['STATE_Fixation1_START'] - df['STATE_Start_task_START']
+                df['corridor1_lat'] = df['STATE_Fixation2_START'] - df['STATE_Start_task_START']
+                df['corridor2_lat'] = df['STATE_Fixation3_START'] - df['STATE_Start_task_START']
+                df['corridor3_lat'] = df['STATE_Response_window_START'] - df['STATE_Start_task_START']
+                df['corridor_resp_lat'] = df['STATE_Response_window_END'] - df['STATE_Start_task_START']
+                df['corridor_lick_lat'] = df['STATE_Exit_START'] - df['STATE_Start_task_START']
 
-                first_resp_df.loc[first_resp_df['y']==1000, 'trial_type_simple']='SIL'
+                # Selecting the desired columns
+                sub_df = df[
+                    ['trial', 'opto_bool', 'opto_delay', 'init_lat', 'corridor1_lat', 'corridor2_lat', 'corridor3_lat',
+                     'corridor_resp_lat', 'corridor_lick_lat']]
 
-                for idx, ttype in enumerate(['VG', 'DS', 'SIL']):
-                    axes = plt.subplot2grid((50, 50), (0, y_pos[idx]), rowspan=11, colspan=15)
-                    subset= first_resp_df.loc[first_resp_df['trial_type_simple']==ttype]
-                    axes.set_title(ttype, fontsize=13, fontweight='bold')
-                    sns.lineplot(x='x', y='correct_bool', data=subset,  hue='opto_bool', hue_order=opto_order, marker='o',
-                                 markersize=8, err_style="bars", ci=68, palette=opto_colors)
-                    axes.hlines(y=chance_lines, xmin=x_min, xmax=x_max, color=lines_c, linestyle=':', linewidth=1)
-                    axes.fill_between(np.arange(x_min, x_max, 1), chance_p, 0, facecolor=lines2_c, alpha=0.2)
+                # Reshaping the dataframe to have 'event' and 'latencies' columns
+                sub_df = sub_df.melt(id_vars=['trial', 'opto_bool', 'opto_delay'], var_name='event',
+                                     value_name='latencies')
+                # rename event
+                sub_df['event_number'] = sub_df['event'].replace(
+                    ['init_lat', 'corridor1_lat', 'corridor2_lat', 'corridor3_lat', 'corridor_resp_lat',
+                     'corridor_lick_lat'], [1, 2, 3, 4, 5, 6])  # renamed
+                # reorder the dataframe by trial and event
+                sub_df = sub_df.sort_values(by=['trial', 'event_number'], ascending=True)
+                sub_df = sub_df.reset_index(drop=True)
 
-                    # axis
-                    axes.set_xlim(x_min, x_max)
-                    axes.set_xlabel('Stimulus position (mm)', label_kwargs)
-                    utils.axes_pcent(axes, label_kwargs)
-                    if idx==0:
-                        axes.set_ylabel('Accuracy', label_kwargs)
-                        axes.legend(loc='center', bbox_to_anchor=(0.15, 0.15), title='Laser').set_zorder(10)
-                    else:
-                        axes.set_ylabel('')
-                        try:
-                            axes.get_legend().remove()
-                        except:
-                            pass
+                # calculate previous event latency
+                sub_df['prev_latency'] = sub_df['latencies'].shift()
+                sub_df.loc[sub_df['event_number'] == 1, 'prev_latency'] = 0 # correct prev_latency in init events
 
-                ### HEADINGS: LABELING TYPE
-                labeling = utils.labeling_class(df.subject.iloc[0])
-                axes.text(0.1, 0.9, 'OTPGENETICS SESSION DETAILS    4OHT Labeling: ' + labeling +'\n', fontsize=8, transform=plt.gcf().transFigure)  # header
+                # Calculate opto_event column
+                opto_event = sub_df.groupby('trial').apply(
+                    lambda x: (x['opto_delay']+1.5 > x['prev_latency']) & (x['opto_delay']+1.5 < x['latencies'])).astype(int)
+                opto_event = opto_event.reset_index(drop=True)
+                sub_df['opto_event'] = opto_event  # merge with the sub-df
 
-                ### PLOT 2: LASER ON/OFF
-                axes = plt.subplot2grid((50, 50), (16, 0), rowspan=12, colspan=6)
-                first_resp_df['count']=1
-                counts = first_resp_df.groupby('opto_bool')['count'].sum().reset_index()
-                sns.barplot(x='opto_bool', y='count', data=counts, palette=opto_colors)
-                axes.set_xlabel('Laser', label_kwargs)
-                axes.set_ylabel('Nº of trials', label_kwargs)
-
-                ### PLOT 3: % MISSES WITH LIGHT
-                axes = plt.subplot2grid((50, 50), (16, 10), rowspan=12, colspan=6)
-                df['miss_bool'] = np.where(df['trial_result'] == 'miss', 1, 0)
-                counts = df.drop_duplicates(subset=['trial'], keep='first', inplace=False).copy()
-                counts = counts.groupby('opto_bool')['miss_bool'].sum().reset_index()
-                sns.barplot(x='opto_bool', y='miss_bool', data=counts, palette=opto_colors)
-                axes.set_xlabel('Laser', label_kwargs)
-                axes.set_ylabel('Nº of misses', label_kwargs)
+                # Good/bad opto trial candidates
+                good_opto = sub_df.loc[(
+                            (sub_df['opto_event'] == 1) & (sub_df['event_number'] > 2) & (sub_df['event_number'] < 6) &
+                            sub_df['opto_bool'] == 1)]['trial'].unique()
+                bad_opto= df.loc[((df['opto_delay'] + 1.5 > df['corridor_resp_lat']) & (df['opto_bool'] == 1))]['trial'].unique()
 
 
-                ### PLOT 4: RESPONSE LATENCIES WITH LIGHT
-                axes = plt.subplot2grid((50, 50), (16, 20), rowspan=12, colspan=15)
-                to_plot= first_resp_df.loc[first_resp_df['trial']>8]
-                sns.stripplot(x='trial_result', y='resp_latency', order=['correct_first', 'punish'], hue='opto_bool', hue_order=opto_order, data=to_plot,
-                              palette=opto_colors, dodge=True, ax=axes)
-                sns.boxplot(x='trial_result', y='resp_latency',  order=['correct_first', 'punish'], hue='opto_bool', hue_order=opto_order, data=to_plot,
-                            color='white', linewidth=0.5, showfliers=False, ax=axes)
-                axes.set_ylabel("Response latency (sec)", label_kwargs)
-                axes.set_xlabel('Trial Outcome', label_kwargs)
-                axes.set_xticklabels(['Correct', 'Incorrect'])
-                axes.get_legend().remove()
-                axes.set_ylim(0, 10)
+                #### HEADER
+                s1 = ('Opto trials: ' + str(int(df.opto_bool.sum())) +
+                      ' / Opto valids: ' + str(int(df.opto_bool.sum())-len(bad_opto)) +
+                      ' / Opto trial numbers: ' + str(df.loc[df['opto_bool']==1]['trial'].unique())+ '\n')
 
+                s2 = (' Opto Good Candidates: ' + str(good_opto) +
+                      ' / Opto invalids: '+ str(bad_opto))
+
+                # Plot no opto
+                axes = plt.subplot2grid((50, 50), (0, 0), rowspan=15, colspan=23)
+                axes.text(0.1, 0.9, s1+s2,  fontsize=8, transform=plt.gcf().transFigure)  # header
+                sns.barplot('event_number', 'opto_event', data=sub_df.loc[sub_df['opto_bool'] == 0], ax=axes, color='silver',
+                            estimator = sum, ci = None)
+                axes.set_xticklabels(['init', 'corridor1', 'corridor2', 'corridor3', 'resp win', 'lick win'])
+
+                # PLot opto
+                axes = plt.subplot2grid((50, 50), (0, 25), rowspan=15, colspan=23)
+                sns.barplot('event_number', 'opto_event', data=sub_df.loc[sub_df['opto_bool'] == 1], ax=axes,
+                            color='orange', estimator=sum, ci=None)
+                axes.set_xticklabels(['init', 'corridor1', 'corridor2', 'corridor3', 'resp win', 'lick win'])
 
                 # SAVING AND CLOSING PAGE
                 sns.despine()
                 pdf.savefig()
                 plt.close()
+
+                ############## PAGE 5 ##############    ONLY IF OPTO ON & VIDEOTRACKING WORKING
+                try:
+
+                    plt.figure(figsize=(11.7, 11.7))  # apaisat
+
+                    # SEARCH THE VIDEO FILE THAT CORRESPOND TO THE SESSION FILE
+                    path_components = path.split('/')
+                    path_components[-3] = 'videos'
+                    path_components = path_components[:-1]
+                    video_path = '/'.join(path_components)
+
+                    # Correct the date (reports always end of session  date, sessionname is the starting time)
+                    original_datetime = datetime.strptime(date, '%Y%m%d-%H%M%S')
+                    modified_datetime = original_datetime - timedelta(hours=1)
+                    modified_datetime= modified_datetime.strftime('%Y%m%d-%H%M%S')
+                    modified_datetime = modified_datetime [:-2] # remove seconds because they usually don't coincide
+                    video_name = str(subject) + '_' + str(task) +  '-' + str(int(stage)) +  '-' +str(int(substage)) + '_' + str(modified_datetime)
+
+                    # search the videofile
+                    files = os.listdir(video_path)
+                    video_files = [file for file in files if file.startswith(video_name) and file.endswith('_4.csv')]
+                    video_file = str(video_path) + '/' + str(video_files[0])
+
+                    df_video = pd.read_csv(video_file, sep=',')
+                    df_video = df_video[~df_video["states"].isin(["Correct", "Incorrect", "Miss", "Punish"])]
+
+                    #################### PARSE VIDEO CSV ####################
+
+                    def check_light(states) -> str:
+                        if "On" in states.values:
+                            return "On"
+                        else:
+                            return "Off"
+
+                    df_video["light"] = df_video.groupby("trial")["states"].transform(check_light)
+                    df_video = df_video[df_video["light"] == "On"]
+
+                    df_video = pd.melt(
+                        df_video,
+                        id_vars=["trial", "frames", "light"],
+                        value_vars=["x", "y", "led_on"],
+                        var_name="side",
+                        value_name="val",
+                    )
+                    df_video["side"] = df_video["side"].replace({"x": "left", "y": "right", "led_on": "x_led"})
+
+                    def remove_rows(group):
+                        return group.iloc[10:-10]
+
+                    df_video = df_video.groupby(["trial", "side"]).apply(remove_rows).reset_index(drop=True)
+                    df_video = df_video['trial']+1
+                    # # filter only led_on
+                    # df = df[df["side"] == "x_led"]
+
+                    ######## PLOT
+                    axes = plt.subplot2grid((50, 50), (0, 0), rowspan=10, colspan=10)
+
+                    g = sns.relplot(data=df_video, x="frames", y="val", hue="side", hue_order=['left', 'right', 'x_led'], col="trial",
+                        col_wrap=5,  kind="line", facet_kws={"sharey": False, "sharex": False},  height=2, ax=axes,
+                        palette = ['indianred', 'cornflowerblue', 'orange'])
+
+                    g.set(ylim=(0, 260))
+
+                    # SAVING AND CLOSING PAGE
+                    sns.despine()
+                    pdf.savefig()
+                    plt.close()
+
+
+                except:
+                    print('No video csv found')
+
+                # ### PLOT 1: STIMULUS POSITION ACCURACY BY TRIAL TYPE
+                # x_min = 0
+                # x_max = 400  # screen size
+                # opto_colors=['gray', 'gold']
+                # opto_order=[0, 1]
+                # y_pos = [0, 17, 35]
+                #
+                # first_resp_df.loc[first_resp_df['y']==1000, 'trial_type_simple']='SIL'
+                #
+                # for idx, ttype in enumerate(['VG', 'DS', 'SIL']):
+                #     axes = plt.subplot2grid((50, 50), (0, y_pos[idx]), rowspan=11, colspan=15)
+                #     subset= first_resp_df.loc[first_resp_df['trial_type_simple']==ttype]
+                #     axes.set_title(ttype, fontsize=13, fontweight='bold')
+                #     sns.lineplot(x='x', y='correct_bool', data=subset,  hue='opto_bool', hue_order=opto_order, marker='o',
+                #                  markersize=8, err_style="bars", ci=68, palette=opto_colors)
+                #     axes.hlines(y=chance_lines, xmin=x_min, xmax=x_max, color=lines_c, linestyle=':', linewidth=1)
+                #     axes.fill_between(np.arange(x_min, x_max, 1), chance_p, 0, facecolor=lines2_c, alpha=0.2)
+                #
+                #     # axis
+                #     axes.set_xlim(x_min, x_max)
+                #     axes.set_xlabel('Stimulus position (mm)', label_kwargs)
+                #     utils.axes_pcent(axes, label_kwargs)
+                #     if idx==0:
+                #         axes.set_ylabel('Accuracy', label_kwargs)
+                #         axes.legend(loc='center', bbox_to_anchor=(0.15, 0.15), title='Laser').set_zorder(10)
+                #     else:
+                #         axes.set_ylabel('')
+                #         try:
+                #             axes.get_legend().remove()
+                #         except:
+                #             pass
+                #
+                # ### HEADINGS: LABELING TYPE
+                # labeling = utils.labeling_class(df.subject.iloc[0])
+                # axes.text(0.1, 0.9, 'OTPGENETICS SESSION DETAILS    4OHT Labeling: ' + labeling +'\n', fontsize=8, transform=plt.gcf().transFigure)  # header
+                #
+                # ### PLOT 2: LASER ON/OFF
+                # axes = plt.subplot2grid((50, 50), (16, 0), rowspan=12, colspan=6)
+                # first_resp_df['count']=1
+                # counts = first_resp_df.groupby('opto_bool')['count'].sum().reset_index()
+                # sns.barplot(x='opto_bool', y='count', data=counts, palette=opto_colors)
+                # axes.set_xlabel('Laser', label_kwargs)
+                # axes.set_ylabel('Nº of trials', label_kwargs)
+                #
+                # ### PLOT 3: % MISSES WITH LIGHT
+                # axes = plt.subplot2grid((50, 50), (16, 10), rowspan=12, colspan=6)
+                # df['miss_bool'] = np.where(df['trial_result'] == 'miss', 1, 0)
+                # counts = df.drop_duplicates(subset=['trial'], keep='first', inplace=False).copy()
+                # counts = counts.groupby('opto_bool')['miss_bool'].sum().reset_index()
+                # sns.barplot(x='opto_bool', y='miss_bool', data=counts, palette=opto_colors)
+                # axes.set_xlabel('Laser', label_kwargs)
+                # axes.set_ylabel('Nº of misses', label_kwargs)
+                #
+                #
+                # ### PLOT 4: RESPONSE LATENCIES WITH LIGHT
+                # axes = plt.subplot2grid((50, 50), (16, 20), rowspan=12, colspan=15)
+                # to_plot= first_resp_df.loc[first_resp_df['trial']>8]
+                # sns.stripplot(x='trial_result', y='resp_latency', order=['correct_first', 'punish'], hue='opto_bool', hue_order=opto_order, data=to_plot,
+                #               palette=opto_colors, dodge=True, ax=axes)
+                # sns.boxplot(x='trial_result', y='resp_latency',  order=['correct_first', 'punish'], hue='opto_bool', hue_order=opto_order, data=to_plot,
+                #             color='white', linewidth=0.5, showfliers=False, ax=axes)
+                # axes.set_ylabel("Response latency (sec)", label_kwargs)
+                # axes.set_xlabel('Trial Outcome', label_kwargs)
+                # axes.set_xticklabels(['Correct', 'Incorrect'])
+                # axes.get_legend().remove()
+                # axes.set_ylim(0, 10)
+
+
+                # # SAVING AND CLOSING PAGE
+                # sns.despine()
+                # pdf.savefig()
+                # plt.close()
 
         print('New daily report completed successfully')

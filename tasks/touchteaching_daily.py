@@ -48,7 +48,6 @@ def touchteaching_daily (df, save_path, date):
     # PAGE 1:
     with PdfPages(save_path) as pdf:
 
-
         plt.figure(figsize=(8.3, 11.7))  # A4 vertical
 
         # HEADER
@@ -73,7 +72,8 @@ def touchteaching_daily (df, save_path, date):
         df['response_x_plot'] = df['response_x'].replace(np.nan, 200)
         sns.scatterplot(x=df.trial, y=df.response_x_plot, hue=df.trial_result, palette=custom_palette, s=30, ax=axes)
         axes.hlines(y=[200], xmin=0, xmax=total_trials, color='gray', linestyle=':')
-        #axes.set_ylabel('$Responses\ (r_{t})\ (mm)%$') #Ask Balma
+        #axes.set_ylabel('$Responses\ (r_{t})\ (mm)%$')
+        axes.set_ylabel(r'$Responses\ (r_{t})\ (mm)\%$')
         axes.set_xlabel('')
         axes.set_ylim(0, 410)
         axes.set_xlim(0, total_trials+1)
@@ -114,7 +114,8 @@ def touchteaching_daily (df, save_path, date):
         # Hist responses
         axes = plt.subplot2grid((50, 50), (30, 0), rowspan=12, colspan=25)
         sns.distplot(df.response_x, kde=False, bins=bins_resp, color=wmdl_c, ax=axes, hist_kws={'alpha':0.9})
-        #axes.set_xlabel('$Responses\ (r_{t})\ (mm)%$') #Ask Balma
+        #axes.set_xlabel('$Responses\ (r_{t})\ (mm)%$')
+        axes.set_xlabel(r'$Responses\ (r_{t})\ (mm)\%$')
         axes.set_ylabel('Nº of touches')
         sns.despine()
 

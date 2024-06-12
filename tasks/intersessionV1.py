@@ -50,6 +50,7 @@ def intersession(df, save_path_intersesion):
         for col in column_list:
             if col not in df.columns:
                 df[col] = np.nan
+        print("Here 1")
 
         ###### CONVERT STRINGS TO LISTS ######
         conversion_list = ['response_x', 'STATE_Incorrect_START', 'STATE_Incorrect_END',
@@ -64,6 +65,7 @@ def intersession(df, save_path_intersesion):
         df = utils.convert_strings_to_lists(df, conversion_list)
 
         ###### RELEVANT COLUMNS ######
+
         # get first & last items
         df['response_first'] = df['response_x'].str[0]
         df['response_last'] = df['response_x'].str[-1]
@@ -97,7 +99,7 @@ def intersession(df, save_path_intersesion):
         chance = df.chance.unique()
 
         # categorize stimulus positions and respsonses
-        bins = pd.IntervalIndex.from_tuples([(50, 150), (165, 265), (280, 380)])
+        bins = pd.IntervalIndex.from_tuples([(55, 145), (170, 260), (285, 375)])
         x_cats = [-1, 0, 1]
         x_tags = ['L', 'C', 'R']
         df['r_c'] = pd.cut(df['response_first'], bins).map(dict(zip(bins, x_cats)))
@@ -153,6 +155,7 @@ def intersession(df, save_path_intersesion):
             plt.figure(figsize=(11.7, 15))
 
             ### PLOT 1: NUMBER OF TRIALS
+            print("Here 2")
             axes = plt.subplot2grid((50, 50), (0, 0), rowspan=5, colspan=23)
             grouped_df = df.groupby('session').agg({'trial': max, 'day': max, 'stage': max}).reset_index()
 
@@ -177,6 +180,8 @@ def intersession(df, save_path_intersesion):
                       verticalalignment='top')
 
             ### PLOT 2: RELATIVE WEIGHTS
+            print("Here 3")
+
             axes = plt.subplot2grid((50, 50), (0, 27), rowspan=5, colspan=24)
             sns.lineplot(x='day', y='relative_weights', style='stage', markers=True, ax=axes, color='black', data=df)
 
@@ -191,6 +196,8 @@ def intersession(df, save_path_intersesion):
             axes.text(1, 1.2, label, transform=axes.transAxes, fontsize=8, fontweight='bold', verticalalignment='top')
 
             ### PLOT 3:  NUMBER OF SESSIONS
+            print("Here 4")
+
             axes = plt.subplot2grid((50, 50), (6, 0), rowspan=5, colspan=24)
 
             sessions_df = df.groupby(['day']).agg({'session': 'nunique', 'stage': max}).reset_index()
@@ -206,6 +213,8 @@ def intersession(df, save_path_intersesion):
                 label.set(rotation=40)
 
             ### PLOT 4: LATENCIES
+            print("Here 5")
+
             treslt_palette = [correct_first_c, correct_other_c, punish_c]
             treslt_order = ['correct_first', 'correct_other', 'punish']
 
@@ -233,6 +242,8 @@ def intersession(df, save_path_intersesion):
             axes.legend(lines, treslt_order, title='Trial result', fontsize=8, loc='center', bbox_to_anchor=(1.1, 0.7))
 
             ### PLOT 5: TTYPE ACCURACIES
+            print("Here 6")
+
             axes = plt.subplot2grid((50, 50), (14, 0), rowspan=8, colspan=50)
             ttype_palette = [vg_c, ds_c, dm_c, dl_c]
             ttype_order = ['VG', 'DS', 'DM', 'DL']
@@ -265,6 +276,8 @@ def intersession(df, save_path_intersesion):
             axes.legend(lines, ttype_order, fontsize=8, title='Trial type', loc='center', bbox_to_anchor=(1.05, 0.75))
 
             ## PLOT 6:  RESPONSE COUNTS SORTED BY STIMULUS POSITION
+            print("Here 7")
+
             axes = plt.subplot2grid((50, 50), (22, 0), rowspan=5, colspan=50)
 
             side_colors = ['lightseagreen', 'bisque', 'orange']
@@ -284,6 +297,8 @@ def intersession(df, save_path_intersesion):
                     sns.countplot(subset.day, hue=subset.r_c, ax=axes, palette=side_colors)
 
                 axes.set_xlabel('Time (Month/Day)')
+                #axes.set_ylabel('$x_{t}\ :%$' + str(x_tags[idx]))
+                #axes.set_ylabel(r'$x_{{t}} \: \% {}$'.format(x_tags[idx]))
                 axes.set_ylabel('x_{t}\ :%' + str(x_tags[idx]))
 
                 # legend
@@ -293,18 +308,21 @@ def intersession(df, save_path_intersesion):
                     axes.get_legend().remove()
                 else:
                     handles, labels = axes.get_legend_handles_labels()
-                    axes.legend(handles, x_tags, loc='center', bbox_to_anchor=(1.05, 1.5), title='r_{t}\ :%')
+                    axes.legend(handles, x_tags, loc='center', bbox_to_anchor=(1.05, 1.5), title='$r_{t}\ :%$')
                     axes.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
 
             # LAST ROW PLOTS ONLY 5 DAYS
-            df = df.loc[df['day'] > df.day.max() - timedelta(days=5)]
+            df5 = df.loc[df['day'] > df.day.max() - timedelta(days=5)]
 
             ## PLOT 7: ACC TRIAL TYPE
+            print("Here 8")
+
             axes = plt.subplot2grid((50, 50), (39, 0), rowspan=11, colspan=10)
             x_min = -0.5
             x_max = len(ttype_order) - 0.5
 
-            grouped_df = df.groupby('trial_type').agg({'correct_bool': 'mean', 'trial_type_simple': max}).reset_index()
+            grouped_df = df5.groupby('trial_type').agg({'correct_bool': 'mean', 'trial_type_simple': max}).reset_index()
+
             sns.stripplot(x='trial_type_simple', y='correct_bool', data=grouped_df, order=ttype_order,
                           hue="trial_type",
                           jitter=False, size=4, palette='Greys')  # split controls
@@ -313,14 +331,13 @@ def intersession(df, save_path_intersesion):
             except:
                 pass
 
-            # sns.pointplot(x='trial_type_simple', y='correct_bool_last', order=ttype_order, ax=axes, s=100, ci=68, color='black', linestyles=["--"], data=df)
-            # Gives an error, resolved by removing linestyles=["--"] and replacing s=100 by markersize=10
+            #sns.pointplot(x='trial_type_simple', y='correct_bool_last', order=ttype_order, ax=axes, s=100, ci=68, color='black', linestyles=["--"], data=df5)
 
-            sns.pointplot(x='trial_type_simple', y='correct_bool_last', order=ttype_order, ax=axes, markersize=10,
-                          ci=68, color='black', data=df)
+            sns.pointplot(x='trial_type_simple', y='correct_bool_last', order=ttype_order, ax=axes, markersize=10, ci=68,
+            color='black', data=df5)
 
-            sns.pointplot(x='trial_type_simple', y='correct_bool', order=ttype_order, ax=axes, markersize=10, ci=68,
-                          color='black', data=df)
+            #sns.pointplot(x='trial_type_simple', y='correct_bool', order=ttype_order, ax=axes, s=100, ci=68, color='black', data=df5)
+            sns.pointplot(x='trial_type_simple', y='correct_bool', order=ttype_order, ax=axes, markersize=10, ci=68, color='black', data=df5)
 
             axes.hlines(y=[chance], xmin=x_min, xmax=x_max, color=lines_c, linestyle=':', linewidth=1)
             axes.fill_between(np.linspace(x_min, x_max, 2), chance, 0, facecolor=lines2_c, alpha=0.3)
@@ -336,9 +353,11 @@ def intersession(df, save_path_intersesion):
             axes.legend(lines, labels, fontsize=7, loc='center', bbox_to_anchor=(0.75, 1))
 
             #### PLOT 8: ACCURACY VS ABS DELAY
+            print("Here 9")
+
             axes = plt.subplot2grid((50, 50), (39, 10), rowspan=11, colspan=14)
             x_max = 5
-            subset = df.loc[df['delay_total'] < x_max]
+            subset = df5.loc[df5['delay_total'] < x_max]
             subset['delay_bins'] = pd.qcut(subset.delay_total, 8, duplicates='drop')
             try:
                 subset['delay_labels'] = subset.apply(lambda x: x['delay_bins'].mid, axis=1)
@@ -358,14 +377,16 @@ def intersession(df, save_path_intersesion):
                 pass
 
             #### PLOT 9: ACCURACY VS STIMULUS POSITION
+            print("Here 10")
+
             axes = plt.subplot2grid((50, 50), (39, 24), rowspan=11, colspan=10)
-            x_min = df.x_c.min() - 0.5
-            x_max = df.x_c.max() + 0.5
+            x_min = df5.x_c.min() - 0.5
+            x_max = df5.x_c.max() + 0.5
             try:
-                sns.lineplot(x='x_c', y="correct_bool", data=df, hue='trial_type_simple', marker='o',
+                sns.lineplot(x='x_c', y="correct_bool", data=df5, hue='trial_type_simple', marker='o',
                              markersize=7, err_style="bars", ci=68, ax=axes, palette=ttype_palette)
             except:
-                sns.lineplot(x='x_c', y="correct_bool", data=df, hue='trial_type_simple', marker='o',
+                sns.lineplot(x='x_c', y="correct_bool", data=df5, hue='trial_type_simple', marker='o',
                              markersize=7, err_style="bars", ci=68, ax=axes)
 
             axes.hlines(y=[chance], xmin=x_min, xmax=x_max, color=lines_c, linestyle=':', linewidth=1)
@@ -380,22 +401,24 @@ def intersession(df, save_path_intersesion):
             axes.get_legend().remove()
 
             #### PLOT 10: CUMULATIVE TRIAL RATE
+            print("Here 11")
+
             axes = plt.subplot2grid((50, 50), (39, 36), rowspan=11, colspan=14)
 
-            df['start_session'] = df.groupby(['subject', 'session'])['STATE_Start_task_START'].transform('min')
-            df['end_session'] = df.groupby(['subject', 'session'])['STATE_Exit_END'].transform('max')
-            df['session_lenght'] = (df['end_session'] - df['start_session']) / 60
-            df.to_csv('error.csv', index=True)
-            # df['current_time'] = df.groupby(['subject', 'session'])['STATE_Start_task_START'].apply(lambda x: (x - x.iloc[0]) / 60)  # MINS    #This statement is causing errros so rewrote it in a different way.
-            start_times = df.groupby(['subject', 'session'])['STATE_Start_task_START'].transform('first')
-            df['current_time'] = (df['STATE_Start_task_START'] - start_times) / 60
-            max_timing = round(df['session_lenght'].max())
+            df5['start_session'] = df5.groupby(['subject', 'session'])['STATE_Start_task_START'].transform('min')
+            df5['end_session'] = df5.groupby(['subject', 'session'])['STATE_Exit_END'].transform('max')
+            df5['session_lenght'] = (df5['end_session'] - df5['start_session']) / 60
+            #df5['current_time'] = df5.groupby(['subject', 'session'])['STATE_Start_task_START'].apply(lambda x: (x - x.iloc[0]) / 60)  # MINS
+            #df5['current_time'] = df5.groupby(['subject', 'session'])['STATE_Start_task_START'].transform(lambda x: (x - x.min()).dt.total_seconds() / 60)
+            start_times = df5.groupby(['subject', 'session'])['STATE_Start_task_START'].transform('first')
+            df5['current_time'] = (df5['STATE_Start_task_START'] - start_times) / 60
+            max_timing = round(df5['session_lenght'].max())
 
             max_timing = int(max_timing)
             sess_palette = sns.color_palette('Purples', 5)  # color per day
 
-            for idx, day in enumerate(df.day.unique()):
-                subset = df.loc[df['day'] == day]
+            for idx, day in enumerate(df5.day.unique()):
+                subset = df5.loc[df5['day'] == day]
                 n_sess = len(subset.session.unique())
                 try:
                     hist_ = stats.cumfreq(subset.current_time, numbins=max_timing,
@@ -403,7 +426,6 @@ def intersession(df, save_path_intersesion):
                 except:
                     hist_ = stats.cumfreq(subset.current_time, numbins=max_timing, defaultreallimits=(0, max_timing),
                                           weights=None)
-
                 hist_norm = hist_.cumcount / n_sess
                 bins_plt = hist_.lowerlimit + np.linspace(0, hist_.binsize * hist_.cumcount.size, hist_.cumcount.size)
                 sns.lineplot(x=bins_plt, y=hist_norm, color=sess_palette[idx], ax=axes, marker='o', markersize=4)
@@ -415,99 +437,177 @@ def intersession(df, save_path_intersesion):
             lines = [Line2D([0], [0], color=sess_palette[i], marker='o', markersize=7, markerfacecolor=sess_palette[i])
                      for i in
                      range(len(sess_palette))]
+
             axes.legend(lines, np.arange(-5, 0, 1), title='Days', loc='center', bbox_to_anchor=(0.1, 0.85))
 
             # SAVING AND CLOSING PAGE
             sns.despine()
+            print("Here 11.6.1")
             pdf.savefig()
+            print("Here 11.6.2, error here")
             plt.close()
 
-            ##################### OPTO PAGE ########################3
-
-            if df['task'].str.contains('StageTraining_8B_V2').any():
-                # try:
-                df = df.loc[~(df['opto_bool'].isnull())]  # remove null trials
-                df['opto_bool'] = df['opto_bool'].astype('int')
-                df = df.loc[df['date'] != '2023/03/25']  # that day the opto is fake never happened
-                total_opto_sessions = df.groupby('date')['opto_on'].max().reset_index()
-                total_opto_sessions = total_opto_sessions['opto_on'].sum()
-
-                plt.figure(figsize=(11.7, 11.7))  # apaisat
-
-                ### PLOT 11: STIMULUS POSITION ACCURACY BY TRIAL TYPE
-                opto_colors = ['gray', 'gold']
-                opto_order = [0, 1]
-                y_pos = [0, 17, 35]
-                df.loc[df['y'] == 1000, 'trial_type_simple'] = 'SIL'
-
-                for idx, ttype in enumerate(['VG', 'DS', 'SIL']):
-                    axes = plt.subplot2grid((50, 50), (0, y_pos[idx]), rowspan=11, colspan=15)
-                    subset = df.loc[df['trial_type_simple'] == ttype]
-                    axes.set_title(ttype, fontsize=13, fontweight='bold')
-                    sns.lineplot(x='x_c', y='correct_bool', data=subset, hue='opto_bool', hue_order=opto_order,
-                                 marker='o', markersize=7, err_style="bars", ci=68, palette=opto_colors)
-                    axes.hlines(y=chance, xmin=x_min, xmax=x_max, color=lines_c, linestyle=':', linewidth=1)
-                    axes.fill_between(np.arange(x_min, x_max + 1, 1), chance, 0, facecolor=lines2_c, alpha=0.2)
-
-                    # axis
-                    axes.set_xlabel('Stimulus position')
-                    utils.axes_pcent(axes, label_kwargs)
-                    axes.xaxis.set_ticklabels(['', 'L', 'C', 'R'])
-                    if idx == 0:
-                        axes.set_ylabel('Accuracy (%)', label_kwargs)
-                        axes.legend(loc='center', bbox_to_anchor=(0.15, 0.15), title='Laser').set_zorder(10)
-                    else:
-                        axes.set_ylabel('')
-                        try:
-                            axes.get_legend().remove()
-                        except:
-                            pass
-
-                ### HEADINGS: LABELING TYPE
-                labeling = utils.labeling_class(df.subject.iloc[0])
-                text = 'OTPGENETICS SESSION DETAILS     4OHT Labeling: ' + labeling + '\n' + 'Accumulated opto sessions: ' + str(
-                    int(total_opto_sessions)) + '\n'
-                axes.text(0.1, 0.9, text, fontsize=8, transform=plt.gcf().transFigure)  # header
-
-                ### PLOT 12: ### PLOT 2: LASER ON/OFF
-                axes = plt.subplot2grid((50, 50), (16, 0), rowspan=12, colspan=6)
-                df['count'] = 1
-                opto_df = df.loc[df['opto_on'] == 1]
-                counts = opto_df.groupby('opto_bool')['count'].sum().reset_index()
-                sns.barplot(x='opto_bool', y='count', data=counts, palette=opto_colors)
-                axes.set_xlabel('Laser', label_kwargs)
-                axes.set_ylabel('Nº of trials', label_kwargs)
-
-                ### PLOT 3: % MISSES WITH LIGHT
-                axes = plt.subplot2grid((50, 50), (16, 10), rowspan=12, colspan=6)
-                opto_df['miss_bool'] = np.where(opto_df['trial_result'] == 'miss', 1, 0)
-                counts = opto_df.groupby('opto_bool')['miss_bool'].sum().reset_index()
-                sns.barplot(x='opto_bool', y='miss_bool', data=counts, palette=opto_colors)
-                axes.set_xlabel('Laser', label_kwargs)
-                axes.set_ylabel('Nº of misses', label_kwargs)
-
-                ### PLOT 4: RESPONSE LATENCIES WITH LIGHT
-                axes = plt.subplot2grid((50, 50), (16, 20), rowspan=12, colspan=15)
-                to_plot = df.loc[df['trial'] > 8]
-                sns.stripplot(x='trial_result', y='resp_latency', order=['correct_first', 'punish'], hue='opto_bool',
-                              hue_order=opto_order, data=to_plot,
-                              palette=opto_colors, dodge=True, ax=axes)
-                sns.boxplot(x='trial_result', y='resp_latency', order=['correct_first', 'punish'], hue='opto_bool',
-                            hue_order=opto_order, data=to_plot,
-                            color='white', linewidth=0.5, showfliers=False, ax=axes)
-                axes.set_ylabel("Response latency (sec)", label_kwargs)
-                axes.set_xlabel('Trial Outcome', label_kwargs)
-                axes.set_xticklabels(['Correct', 'Incorrect'])
-                axes.get_legend().remove()
-                axes.set_ylim(0, 5)
-
-                # SAVING AND CLOSING PAGE
-                sns.despine()
-                pdf.savefig()
-                plt.close()
-                # except:
-                #     print('Error opto parameters')
-
+        #     ##################### CHANGING PROBABILITIES PAGE ########################
+        #
+        #
+        #     plt.figure(figsize=(11.7, 15))
+        #     print("Here 11.8")
+        #
+        #     ### PLOTS 11: ACCURACY SIDE & DELAY LAST 5 DAYS
+        #     print("Here 12")
+        #     for idx, day in enumerate(df5.day.unique()):
+        #         if idx != 0:
+        #             x_pos = idx * 10
+        #         else:
+        #             x_pos = idx
+        #         axes = plt.subplot2grid((50, 50), (0, x_pos), rowspan=10, colspan=9)
+        #
+        #         # subset data by day
+        #         subset = df5.loc[df5['day'] == day]
+        #         axes.set_title(day, fontweight='bold')
+        #
+        #         # plot
+        #         x_min = -0.5
+        #         x_max = len(ttype_order) - 0.5
+        #         sns.pointplot(x='trial_type_simple', y="correct_bool", order=ttype_order, ax=axes, s=100,
+        #                       data=subset, hue='x_c', hue_order=x_cats, ci=68, palette=side_palette)
+        #         axes.hlines(y=[chance], xmin=x_min, xmax=x_max, color=lines_c, linestyle=':', linewidth=1)
+        #         axes.fill_between(np.linspace(x_min, x_max, 2), chance, 0, facecolor=lines2_c, alpha=0.3)
+        #         axes.set_xlabel('Trial type', label_kwargs)
+        #         utils.axes_pcent(axes, label_kwargs)
+        #
+        #         # axis parameters
+        #         if idx != 0:
+        #             axes.yaxis.set_ticklabels([])
+        #             axes.set_ylabel('')
+        #             axes.get_legend().remove()
+        #         else:
+        #             # legend
+        #             lines = [Line2D([0], [0], color=side_colors[i], marker='o', markersize=7,
+        #                             markerfacecolor=side_colors[i]) for i in range(len(side_colors))]
+        #             axes.legend(lines, x_tags, title='Stimulus', loc='center', bbox_to_anchor=(0.1, 0.15))
+        #
+        #     ### PLOTS 12: ACCURACY SIDE LAST MONTH
+        #     print("Here 13")
+        #
+        #     axes = plt.subplot2grid((50, 50), (14, 0), rowspan=10, colspan=50)
+        #     print(df.day.nunique())
+        #     print(df.x_c.unique())
+        #     print(df.x_c.unique())
+        #
+        #     sns.lineplot(x='day', y='correct_bool', hue='x_c', hue_order=x_cats,
+        #                  palette=side_palette, marker='o', markersize=7, ax=axes, data=df, ci=None)
+        #     axes.hlines(y=[chance], xmin=df.day.min(), xmax=df.day.max(), color=lines_c, linestyle=':',
+        #                 linewidth=1)
+        #     axes.fill_between(df.day, df.chance, 0, facecolor=lines2_c, alpha=0.3)
+        #
+        #     # Vlines indicating when probs changed  #### TO BE CHECKED!
+        #     if df['task'].str.contains('StageTraining_9B_V3').any():
+        #         # Iterate through unique values of 'bias_side'
+        #         for side_value in df['bias_side'].unique():
+        #             # Get the 'day' values where 'bias_side' changes
+        #             changes_days = df[df['bias_side'] == side_value]['day'].values
+        #             changes_probs = df[df['bias_side'] == side_value]['bias_prob'].values
+        #             # Plot vertical lines at change points
+        #             plt.vlines(x=changes_days, ymin=0, ymax=1, color='gray', linestyles='dashed')
+        #             # Annotate the plot with 'bias_side' values
+        #             for idx, day in enumerate(changes_days):
+        #                 plt.text(day, 1.05, str(x_tags[side_value] + ' ' + str(changes_probs[idx])), ha='center')
+        #
+        #     utils.axes_pcent(axes, label_kwargs)
+        #     axes.get_legend().remove()
+        #     axes.set_xlabel('Time (Month/Day)')
+        #
+        #     # SAVING AND CLOSING PAGE
+        #     sns.despine()
+        #     pdf.savefig()
+        #     plt.close()
+        #
+        #     ##################### OPTO PAGE ########################
+        #
+        #     if df['task'].str.contains('StageTraining_8B_V2').any():
+        #         df = df.loc[~(df['opto_bool'].isnull())]  # remove null trials
+        #         df['opto_bool'] = df['opto_bool'].astype('int')
+        #         df = df.loc[df['date'] != '2023/03/25']  # that day the opto is fake never happened
+        #         total_opto_sessions = df.groupby('date')['opto_on'].max().reset_index()
+        #         total_opto_sessions = total_opto_sessions['opto_on'].sum()
+        #
+        #         plt.figure(figsize=(11.7, 11.7))  # apaisat
+        #
+        #         ### PLOT 11: STIMULUS POSITION ACCURACY BY TRIAL TYPE
+        #         opto_colors = ['gray', 'gold']
+        #         opto_order = [0, 1]
+        #         y_pos = [0, 17, 35]
+        #         df.loc[df['y'] == 1000, 'trial_type_simple'] = 'SIL'
+        #
+        #         for idx, ttype in enumerate(['VG', 'DS', 'SIL']):
+        #             axes = plt.subplot2grid((50, 50), (0, y_pos[idx]), rowspan=11, colspan=15)
+        #             subset = df.loc[df['trial_type_simple'] == ttype]
+        #             axes.set_title(ttype, fontsize=13, fontweight='bold')
+        #             sns.lineplot(x='x_c', y='correct_bool', data=subset, hue='opto_bool', hue_order=opto_order,
+        #                          marker='o', markersize=7, err_style="bars", ci=68, palette=opto_colors)
+        #             axes.hlines(y=chance, xmin=x_min, xmax=x_max, color=lines_c, linestyle=':', linewidth=1)
+        #             axes.fill_between(np.arange(x_min, x_max + 1, 1), chance, 0, facecolor=lines2_c, alpha=0.2)
+        #
+        #             # axis
+        #             axes.set_xlabel('Stimulus position')
+        #             utils.axes_pcent(axes, label_kwargs)
+        #             axes.xaxis.set_ticklabels(['', 'L', 'C', 'R'])
+        #             if idx == 0:
+        #                 axes.set_ylabel('Accuracy (%)', label_kwargs)
+        #                 axes.legend(loc='center', bbox_to_anchor=(0.15, 0.15), title='Laser').set_zorder(10)
+        #             else:
+        #                 axes.set_ylabel('')
+        #                 try:
+        #                     axes.get_legend().remove()
+        #                 except:
+        #                     pass
+        #
+        #         ### HEADINGS: LABELING TYPE
+        #         labeling = utils.labeling_class(df.subject.iloc[0])
+        #         text = 'OTPGENETICS SESSION DETAILS     4OHT Labeling: ' + labeling + '\n' + 'Accumulated opto sessions: ' + str(
+        #             int(total_opto_sessions)) + '\n'
+        #         axes.text(0.1, 0.9, text, fontsize=8, transform=plt.gcf().transFigure)  # header
+        #
+        #         ### PLOT 12: ### PLOT 2: LASER ON/OFF
+        #         axes = plt.subplot2grid((50, 50), (16, 0), rowspan=12, colspan=6)
+        #         df['count'] = 1
+        #         opto_df = df.loc[df['opto_on'] == 1]
+        #         counts = opto_df.groupby('opto_bool')['count'].sum().reset_index()
+        #         sns.barplot(x='opto_bool', y='count', data=counts, palette=opto_colors)
+        #         axes.set_xlabel('Laser', label_kwargs)
+        #         axes.set_ylabel('Nº of trials', label_kwargs)
+        #
+        #         ### PLOT 3: % MISSES WITH LIGHT
+        #         axes = plt.subplot2grid((50, 50), (16, 10), rowspan=12, colspan=6)
+        #         opto_df['miss_bool'] = np.where(opto_df['trial_result'] == 'miss', 1, 0)
+        #         counts = opto_df.groupby('opto_bool')['miss_bool'].sum().reset_index()
+        #         sns.barplot(x='opto_bool', y='miss_bool', data=counts, palette=opto_colors)
+        #         axes.set_xlabel('Laser', label_kwargs)
+        #         axes.set_ylabel('Nº of misses', label_kwargs)
+        #
+        #         ### PLOT 4: RESPONSE LATENCIES WITH LIGHT
+        #         axes = plt.subplot2grid((50, 50), (16, 20), rowspan=12, colspan=15)
+        #         to_plot = df.loc[df['trial'] > 8]
+        #         sns.stripplot(x='trial_result', y='resp_latency', order=['correct_first', 'punish'], hue='opto_bool',
+        #                       hue_order=opto_order, data=to_plot,
+        #                       palette=opto_colors, dodge=True, ax=axes)
+        #         sns.boxplot(x='trial_result', y='resp_latency', order=['correct_first', 'punish'], hue='opto_bool',
+        #                     hue_order=opto_order, data=to_plot,
+        #                     color='white', linewidth=0.5, showfliers=False, ax=axes)
+        #         axes.set_ylabel("Response latency (sec)", label_kwargs)
+        #         axes.set_xlabel('Trial Outcome', label_kwargs)
+        #         axes.set_xticklabels(['Correct', 'Incorrect'])
+        #         axes.get_legend().remove()
+        #         axes.set_ylim(0, 5)
+        #
+        #         # SAVING AND CLOSING PAGE
+        #         sns.despine()
+        #         pdf.savefig()
+        #         plt.close()
+        #         # except:
+        #         #     print('Error opto parameters')
+        #
         try:
             utils.slack_spam(str(df.subject.iloc[0]) + '_intersession', save_path_intersesion, "#wmfm_reports")
         except:
