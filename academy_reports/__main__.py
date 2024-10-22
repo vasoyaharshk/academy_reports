@@ -259,6 +259,9 @@ def main():
         if not os.path.exists(save_directory):
             os.makedirs(save_directory)
         utils.create_csv(global_df, save_directory + '/global_trials.csv')
+
+        global_df_pi = global_df[global_df['task'].str.contains('Probability', case=False, na=False)].copy()
+        utils.create_csv(global_df_pi, save_directory + '/global_trials_pi.csv')
         print('END!')
 
 

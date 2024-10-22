@@ -75,7 +75,7 @@ def stagetraining_daily (df, save_path, date):
     x_positions = df.x.unique().tolist()
     x_positions.sort()
     if mask==3:
-        r_positions = [60, 175, 290]
+        r_positions = [65, 190, 310]
     l_edge = int(min(r_positions) - correct_th)
     r_edge = int(max(r_positions) + correct_th)
     bins_resp = np.linspace(l_edge, r_edge, len(r_positions) + 1)
@@ -170,7 +170,7 @@ def stagetraining_daily (df, save_path, date):
     resp_df['resp_latency'] = resp_df['responses_time'] - resp_df['STATE_Response_window_START']
     resp_df['error_x'] = resp_df['response_x'] - resp_df['x']
     resp_df['abs_error_x'] = resp_df['error_x'].abs()
-    resp_df['correct_bool'] = np.where(resp_df['correct_th'] / 2 >= resp_df['error_x'].abs(), 1, 0)
+    resp_df['correct_bool'] = np.where(resp_df['correct_th'] >= resp_df['error_x'].abs(), 1, 0)
     resp_df['miss_bool'] = np.where(resp_df['trial_result'] =='miss', 1, 0)
     resp_df.loc[(resp_df.trial_result == 'miss', 'correct_bool')] = np.nan
     # Correct_bool column: 1 correct; 0 incorrects/punish; nan miss
