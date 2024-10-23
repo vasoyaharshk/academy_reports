@@ -142,10 +142,40 @@ def stagetraining_daily (df, save_path, date):
     except:
         df['response_window_end'] = df['STATE_Response_window2_END'].apply(lambda x: x if type(x) == float else [np.nan])
 
-    df['response_window_end'] = df['response_window_end'].fillna(df['STATE_Response_window_END'])
-    df['reward_time'] = df['STATE_Correct_first_reward_START'].fillna(0) + df[
-        'STATE_Correct_other_reward_START'].fillna(0) + df['STATE_Miss_reward_START'].fillna(0)
-    df['lick_latency'] = df['reward_time'] - df['response_window_end']
+    # df['response_window_end'] = df['response_window_end'].fillna(df['STATE_Response_window_END'])
+    # df['reward_time'] = df['STATE_Correct_first_reward_START'].fillna(0) + df[
+    #     'STATE_Correct_other_reward_START'].fillna(0) + df['STATE_Miss_reward_START'].fillna(0)
+    # df['lick_latency'] = df['reward_time'] - df['response_window_end']
+
+    try:
+        # Fill missing values for 'response_window_end' from 'STATE_Response_window_END'
+        df['response_window_end'] = df['response_window_end'].fillna(df['STATE_Response_window_END'])
+
+        # Calculate 'reward_time' by summing up the relevant columns
+        df['reward_time'] = df['STATE_Correct_first_reward_START'].fillna(0) + \
+                            df['STATE_Correct_other_reward_START'].fillna(0) + \
+                            df['STATE_Miss_reward_START'].fillna(0)
+
+        # Try direct subtraction
+        df['lick_latency'] = df['reward_time'] - df['response_window_end']
+
+    except TypeError as e:
+        # Handle any type errors due to incompatible data types (like strings) in the columns
+        print(f"TypeError occurred during subtraction: {e}")
+
+        # Attempt time conversion in case the data is in string or incompatible format
+        try:
+            df['response_window_end'] = pd.to_datetime(df['response_window_end'], errors='coerce')
+            df['reward_time'] = pd.to_datetime(df['reward_time'], errors='coerce')
+
+            # Perform the subtraction again after converting to datetime
+            df['lick_latency'] = df['reward_time'] - df['response_window_end']
+
+            # Convert the timedelta to seconds if needed
+            df['lick_latency'] = df['lick_latency'].dt.total_seconds()
+
+        except Exception as e:
+            print(f"An error occurred during time conversion: {e}")
 
     # CALCULATE STIMULUS DURATION &  DELAY
     df['corridor_time'] = df['STATE_Fixation3_END'] - df['STATE_Fixation1_START']
