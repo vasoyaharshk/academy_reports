@@ -262,6 +262,9 @@ def main():
 
         global_df_pi = global_df[global_df['task'].str.contains('Probability', case=False, na=False)].copy()
         utils.create_csv(global_df_pi, save_directory + '/global_trials_pi.csv')
+
+        global_df_st = global_df[global_df['task'].str.contains('StageTraining', case=False, na=False)].copy()
+        utils.create_csv(global_df_st, save_directory + '/global_trials_st.csv')
         print('END!')
 
 
