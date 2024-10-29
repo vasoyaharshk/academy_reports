@@ -208,7 +208,8 @@ def stimulus_duration_calculation(row):
         if row['stim_dur_ds'] > 0:  # stimulus duration extended to the next state
             stim_dur_ext = stim_duration + row['stim_dur_ds']
 
-            print
+            print(f"Type of row['response_window_end']: {type(row['response_window_end'])}")
+            print(f"Type of stim_onset: {type(stim_onset)}")
 
             max_dur = row['response_window_end'] - stim_onset
             if stim_dur_ext <= max_dur:  # extend when don't overcome max
