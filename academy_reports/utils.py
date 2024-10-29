@@ -207,6 +207,9 @@ def stimulus_duration_calculation(row):
 
         if row['stim_dur_ds'] > 0:  # stimulus duration extended to the next state
             stim_dur_ext = stim_duration + row['stim_dur_ds']
+
+            print
+
             max_dur = row['response_window_end'] - stim_onset
             if stim_dur_ext <= max_dur:  # extend when don't overcome max
                 stim_duration = stim_dur_ext
@@ -249,7 +252,23 @@ def stimulus_duration_calculation(row):
     elif 'VG' in row['trial_type']:
         stim_onset = row['STATE_Fixation1_START']
         stim_offset = row['response_window_end']
-        stim_duration = stim_offset - stim_onset
+
+        # Convert stim_onset and stim_offset to compatible types if necessary
+        if isinstance(stim_offset, pd.Timestamp) and isinstance(stim_onset, (float, int)):
+            stim_onset = pd.Timestamp(stim_onset, unit='s')
+        elif isinstance(stim_onset, pd.Timestamp) and isinstance(stim_offset, (float, int)):
+            stim_offset = pd.Timestamp(stim_offset, unit='s')
+        elif isinstance(stim_onset, str) or isinstance(stim_offset, str):
+            stim_offset = pd.Timestamp(stim_offset, unit='s')
+            stim_onset = pd.Timestamp(stim_onset, unit='s')
+
+        # Calculate stim_duration if both values are compatible
+        try:
+            stim_duration = stim_offset - stim_onset
+            return stim_onset, stim_duration, stim_offset
+        except TypeError as e:
+            print(f"TypeError occurred during subtraction: {e}")
+            return np.nan, np.nan, np.nan
 
     try:
         return stim_onset, stim_duration, stim_offset
