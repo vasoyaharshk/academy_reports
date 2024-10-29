@@ -208,49 +208,49 @@ def main():
                 if not os.path.exists(save_directory):
                     os.makedirs(save_directory)
 
-                # INTERSESSIONS
-                try:
-                    file_name_intersesion = subject + '_intersession.pdf'
-                    save_path_intersesion = os.path.join(save_directory, file_name_intersesion)
-                    intersession(df.copy(), save_path_intersesion)
-                except:
-                     print('Error performing the intersession')
-                     pass
-
-                # DAILY REPORTS
-                for sess, session in df.groupby('session'):
-                    subject = session.subject.iloc[0]
-                    task = session.task.iloc[0]
-                    stage = session.stage.iloc[0]
-                    try:
-                        date = datetime.fromtimestamp(session.STATE_Start_task_START.iloc[0]).strftime("%Y%m%d-%H%M%S")
-                        print(date)
-                    except:
-                        bad_date=session.STATE_Start_task_START.iloc[0]
-                        print(bad_date)
-                    print(task[0:13])
-                    print(sess)
-
-                    file_name = subject + '_' + task + '-' + str(stage) + '_' + date + '.pdf'
-                    save_path = os.path.join(save_directory, file_name)
-
-                    print(save_path)
-
-                    if not os.path.exists(save_path): #ONLY DONE IF NOT EXISTS
-                            if task == 'LickTeaching':
-                                print("daily 1")
-                                lickteaching_daily(session.copy(), save_path, date)
-                            elif task == 'TouchTeaching':
-                                touchteaching_daily(session.copy(), save_path, date)
-                            elif task[0:13] == 'StageTraining':
-                                stagetraining_daily(session.copy(), save_path, date)
-                            elif task == 'S1':
-                                S1_daily(session.copy(), save_path, date)
-                            else:
-                                print('Task not found for file:', path, 'task:', task)
-
-                    else:
-                        print('Already done!')
+                # # INTERSESSIONS
+                # try:
+                #     file_name_intersesion = subject + '_intersession.pdf'
+                #     save_path_intersesion = os.path.join(save_directory, file_name_intersesion)
+                #     intersession(df.copy(), save_path_intersesion)
+                # except:
+                #      print('Error performing the intersession')
+                #      pass
+                #
+                # # DAILY REPORTS
+                # for sess, session in df.groupby('session'):
+                #     subject = session.subject.iloc[0]
+                #     task = session.task.iloc[0]
+                #     stage = session.stage.iloc[0]
+                #     try:
+                #         date = datetime.fromtimestamp(session.STATE_Start_task_START.iloc[0]).strftime("%Y%m%d-%H%M%S")
+                #         print(date)
+                #     except:
+                #         bad_date=session.STATE_Start_task_START.iloc[0]
+                #         print(bad_date)
+                #     print(task[0:13])
+                #     print(sess)
+                #
+                #     file_name = subject + '_' + task + '-' + str(stage) + '_' + date + '.pdf'
+                #     save_path = os.path.join(save_directory, file_name)
+                #
+                #     print(save_path)
+                #
+                #     if not os.path.exists(save_path): #ONLY DONE IF NOT EXISTS
+                #             if task == 'LickTeaching':
+                #                 print("daily 1")
+                #                 lickteaching_daily(session.copy(), save_path, date)
+                #             elif task == 'TouchTeaching':
+                #                 touchteaching_daily(session.copy(), save_path, date)
+                #             elif task[0:13] == 'StageTraining':
+                #                 stagetraining_daily(session.copy(), save_path, date)
+                #             elif task == 'S1':
+                #                 S1_daily(session.copy(), save_path, date)
+                #             else:
+                #                 print('Task not found for file:', path, 'task:', task)
+                #
+                #     else:
+                #         print('Already done!')
 
         # GLOBAL DF
         print('Generating global df')

@@ -211,12 +211,27 @@ def stimulus_duration_calculation(row):
             print(f"Type of row['response_window_end']: {type(row['response_window_end'])}")
             print(f"Type of stim_onset: {type(stim_onset)}")
 
-            max_dur = row['response_window_end'] - stim_onset
-            if stim_dur_ext <= max_dur:  # extend when don't overcome max
-                stim_duration = stim_dur_ext
-            elif stim_dur_ext > max_dur:  # take the maximum when overcome
-                stim_duration = max_dur
-            stim_offset = stim_onset + stim_duration  # correct stimulus offset
+            response_window_end = row['response_window_end']
+            if pd.isna(response_window_end):
+                print("response_window_end is NaT; returning NaNs.")
+                return np.nan, np.nan, np.nan
+
+            # Convert types as needed
+            if isinstance(stim_onset, (float, int)):
+                stim_onset = pd.Timestamp(stim_onset, unit='s')
+            if isinstance(response_window_end, (float, int)):
+                response_window_end = pd.Timestamp(response_window_end, unit='s')
+
+            try:
+                max_dur = response_window_end - stim_onset
+                if stim_dur_ext <= max_dur:
+                    stim_duration = stim_dur_ext
+                else:
+                    stim_duration = max_dur
+                stim_offset = stim_onset + stim_duration
+            except TypeError as e:
+                print(f"TypeError during max_dur calculation: {e}")
+                return np.nan, np.nan, np.nan
 
     elif 'DM' in row['trial_type']:
         if row['trial_type'] == 'DM':
