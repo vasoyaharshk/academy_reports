@@ -3,6 +3,8 @@ from academy_reports import settings
 from academy_reports import arg
 import os
 import pandas as pd
+import rpy2.robjects as robjects
+from rpy2.robjects import pandas2ri
 from datetime import timedelta, datetime
 from tasks.lickteaching_daily import lickteaching_daily
 from tasks.touchteaching_daily import touchteaching_daily
@@ -11,6 +13,8 @@ from tasks.intersession import intersession
 from tasks.ecohab_report import ecohab_report
 import warnings
 warnings.filterwarnings('ignore')
+
+
 
 
 # MAIN
@@ -266,6 +270,41 @@ def main():
         global_df_st = global_df[global_df['task'].str.contains('StageTraining', case=False, na=False)].copy()
         utils.create_csv(global_df_st, save_directory + '/global_trials_wm.csv')
         print('END!')
+
+    # # Load R scripts for Harsh_RV1_Data_Sorting and Harsh_RV1_Progress
+    # def load_r_scripts():
+    #     # Load Harsh_RV1_Data_Sorting.R script
+    #     with open('/home/ratvillage01/plots/Harsh_RV1_Data_Sorting.R', 'r') as file:
+    #         harsh_rv1_data_sorting_code = file.read()
+    #     robjects.r(harsh_rv1_data_sorting_code)
+    #
+    #     # Load Harsh__RV1_Progress.R script
+    #     with open('/home/ratvillage01/plots/Harsh_RV1_Data_Progress.R', 'r') as file:
+    #         harsh_rv1_progress_code = file.read()
+    #     robjects.r(harsh_rv1_progress_code)
+    #
+    # # Initialize by loading R scripts
+    # load_r_scripts()
+    #
+    # # Define Python functions to call the R functions
+    # def Harsh_RV1_Data_Sorting(data):
+    #     """
+    #     This function acts as a wrapper to call the Harsh_RV1_Data_Sorting function in R.
+    #     Pass the necessary arguments as per the R function's requirement.
+    #     """
+    #     # Assuming `data` is a DataFrame or similar object; you may need to convert it to R format
+    #     r_data_sorting = robjects.globalenv['Harsh_RV1_Data_Sorting']
+    #     result = r_data_sorting(data)  # Call the R function
+    #     return result
+    #
+    # def Harsh_RV1_Progress(data):
+    #     """
+    #     This function acts as a wrapper to call the Harsh_RV1_Progress function in R.
+    #     Pass the necessary arguments as per the R function's requirement.
+    #     """
+    #     r_progress = robjects.globalenv['Harsh_RV1_Progress']
+    #     result = r_progress(data)  # Call the R function
+    #     return result
 
 
 # MAIN
