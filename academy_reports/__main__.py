@@ -264,11 +264,16 @@ def main():
             os.makedirs(save_directory)
         # utils.create_csv(global_df, save_directory + '/global_trials.csv')
 
+
+        # Filter for tasks that contain 'Probability':
         global_df_pi = global_df[global_df['task'].str.contains('Probability', case=False, na=False)].copy()
         utils.create_csv(global_df_pi, save_directory + '/global_trials_pi.csv')
 
-        global_df_st = global_df[global_df['task'].str.contains('StageTraining', case=False, na=False)].copy()
+        # Filter for tasks that do NOT contain 'Probability':
+        global_df_st = global_df[~global_df['task'].str.contains('Probability', case=False, na=False)].copy()
         utils.create_csv(global_df_st, save_directory + '/global_trials_wm.csv')
+
+
         print('END!')
 
     # # Load R scripts for Harsh_RV1_Data_Sorting and Harsh_RV1_Progress
