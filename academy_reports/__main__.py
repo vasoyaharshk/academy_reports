@@ -269,7 +269,8 @@ def main():
         global_trials_wm_file = os.path.join(save_directory, 'global_trials_wm.csv')
 
         # Delete existing files if they exist
-        for file in [global_trials_pi_file, global_trials_wm_file]:
+        #for file in [global_trials_pi_file, global_trials_wm_file]:
+        for file in [global_trials_pi_file]:
             if os.path.exists(file):
                 os.remove(file)
 
@@ -286,7 +287,7 @@ def main():
 
         # Filter for tasks that do NOT contain 'Probability':
         global_df_st = global_df[~global_df['task'].str.contains('Probability', case=False, na=False)].copy()
-        utils.create_csv(global_df_st, save_directory + '/global_trials_wm.csv')
+        #utils.create_csv(global_df_st, save_directory + '/global_trials_wm.csv')
 
         print('END!')
 
