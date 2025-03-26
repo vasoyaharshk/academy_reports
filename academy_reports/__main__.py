@@ -259,6 +259,10 @@ def main():
         # GLOBAL DF
         print('Generating global df')
         global_df = pd.concat(dfs)
+
+        # Remove all the blank trials:
+        global_df = global_df.loc[~((global_df['trial_length'] == 0.1) & (global_df['trial_result'].isna()))].copy()
+
         save_directory = os.path.join(settings.save_directory)
         if not os.path.exists(save_directory):
             os.makedirs(save_directory)
