@@ -289,7 +289,7 @@ def main():
         global_df_pi = global_df[global_df['task'].str.contains('Probability', case=False, na=False)].copy()
         utils.create_csv(global_df_pi, save_directory + '/global_trials_pi.csv')
 
-        # Filter for tasks that do NOT contain 'Probability':
+        # Filter for tasks that do NOT contain 'Probability': Working Memory
         global_df_st = global_df[~global_df['task'].str.contains('Probability', case=False, na=False)].copy()
         #utils.create_csv(global_df_st, save_directory + '/global_trials_wm.csv')
 
