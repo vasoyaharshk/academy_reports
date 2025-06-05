@@ -269,8 +269,8 @@ def main():
         # utils.create_csv(global_df, save_directory + '/global_trials.csv')
 
         # File paths
-        global_trials_pi_file = os.path.join(save_directory, 'global_trials_pi.csv')
-        global_trials_wm_file = os.path.join(save_directory, 'global_trials_wm.csv')
+        global_trials_pi_file = os.path.join(save_directory, 'global_trials_pi_rv2.csv')
+        global_trials_wm_file = os.path.join(save_directory, 'global_trials_wm_rv2.csv')
 
         # Delete existing files if they exist
         #for file in [global_trials_pi_file, global_trials_wm_file]:
@@ -292,6 +292,12 @@ def main():
         # Filter for tasks that do NOT contain 'Probability': Working Memory
         global_df_st = global_df[~global_df['task'].str.contains('Probability', case=False, na=False)].copy()
         #utils.create_csv(global_df_st, save_directory + '/global_trials_wm.csv')
+
+        # Filter for early training tasks
+        early_training_tasks = ['TouchTeaching', 'Habituation', 'LickTeaching']
+        global_df_early = global_df[
+            global_df['task'].str.contains('|'.join(early_training_tasks), case=False, na=False)].copy()
+        utils.create_csv(global_df_early, os.path.join(save_directory, 'early_training__rv2.csv'))
 
         print('END!')
 
