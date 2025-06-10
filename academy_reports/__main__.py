@@ -261,7 +261,12 @@ def main():
         global_df = pd.concat(dfs)
 
         # Remove all the blank trials:
-        global_df = global_df.loc[~((global_df['trial_length'] == 0.1) & (global_df['trial_result'].isna()))].copy()
+        global_df = global_df.loc[
+            ~(
+                    ((global_df['trial_length'] == 0.1) & (global_df['trial_result'].isna())) |
+                    (global_df['subject'].isin(['m2', 'm3']))
+            )
+        ].copy()
 
         save_directory = os.path.join(settings.save_directory)
         if not os.path.exists(save_directory):
@@ -285,13 +290,9 @@ def main():
         global_df_pi = global_df[global_df['task'].str.contains('Probability', case=False, na=False)].copy()
         utils.create_csv(global_df_pi, global_trials_pi_file)
 
-        #Filter for tasks that contain 'Probability':
-        global_df_pi = global_df[global_df['task'].str.contains('Probability', case=False, na=False)].copy()
-        utils.create_csv(global_df_pi, save_directory + '/global_trials_pi.csv')
-
         # Filter for tasks that do NOT contain 'Probability': Working Memory
-        global_df_st = global_df[~global_df['task'].str.contains('Probability', case=False, na=False)].copy()
-        #utils.create_csv(global_df_st, save_directory + '/global_trials_wm.csv')
+        global_df_wm = global_df[~global_df['task'].str.contains('Probability', case=False, na=False)].copy()
+        #utils.create_csv(global_df_wm, save_directory + '/global_trials_wm.csv')
 
         # Filter for early training tasks
         early_training_tasks = ['TouchTeaching', 'Habituation', 'LickTeaching']
