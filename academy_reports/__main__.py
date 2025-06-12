@@ -298,7 +298,7 @@ def main():
         early_training_tasks = ['TouchTeaching', 'Habituation', 'LickTeaching']
         global_df_early = global_df[
             global_df['task'].str.contains('|'.join(early_training_tasks), case=False, na=False)].copy()
-        utils.create_csv(global_df_early, os.path.join(save_directory, 'early_training__rv2.csv'))
+        utils.create_csv(global_df_early, os.path.join(save_directory, 'early_training_rv2.csv'))
 
         print('END!')
 
