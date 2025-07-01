@@ -209,8 +209,8 @@ def main():
                 print('Starting report '+str(subject))
 
                 save_directory = os.path.join(settings.save_directory, subject)
-                if not os.path.exists(save_directory):
-                    os.makedirs(save_directory)
+                # if not os.path.exists(save_directory):
+                #     os.makedirs(save_directory)
 
                 # # INTERSESSIONS
                 # try:
@@ -269,8 +269,8 @@ def main():
         ].copy()
 
         save_directory = os.path.join(settings.save_directory)
-        if not os.path.exists(save_directory):
-            os.makedirs(save_directory)
+        # if not os.path.exists(save_directory):
+        #     os.makedirs(save_directory)
         # utils.create_csv(global_df, save_directory + '/global_trials.csv')
 
         # File paths
