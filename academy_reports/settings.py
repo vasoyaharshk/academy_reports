@@ -1,5 +1,5 @@
-data_directory = '/home/ratvillage02/academy/data/sessions'
-save_directory =  '/home/ratvillage02/plots'
+data_directory = '/home/ratvillage01/academy/data/sessions'
+save_directory =  '/home/ratvillage01/plots'
 
 
 

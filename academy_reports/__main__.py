@@ -274,8 +274,8 @@ def main():
         # utils.create_csv(global_df, save_directory + '/global_trials.csv')
 
         # File paths
-        global_trials_pi_file = os.path.join(save_directory, 'global_trials_pi_rv2.csv')
-        global_trials_wm_file = os.path.join(save_directory, 'global_trials_wm_rv2.csv')
+        global_trials_pi_file = os.path.join(save_directory, 'global_trials_pi_rv1.csv')
+        global_trials_wm_file = os.path.join(save_directory, 'global_trials_wm_rv1.csv')
 
         # Delete existing files if they exist
         #for file in [global_trials_pi_file, global_trials_wm_file]:
@@ -307,7 +307,7 @@ def main():
         ]
         global_df_early = global_df[
             global_df['task'].str.contains('|'.join(early_training_tasks), case=False, na=False)].copy()
-        utils.create_csv(global_df_early, os.path.join(save_directory, 'early_training_rv2.csv'))
+        utils.create_csv(global_df_early, os.path.join(save_directory, 'early_training_rv1.csv'))
 
         print('END!')
 
