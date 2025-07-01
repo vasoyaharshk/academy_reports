@@ -13,7 +13,7 @@ from tasks.intersession import intersession
 from tasks.ecohab_report import ecohab_report
 import warnings
 warnings.filterwarnings('ignore')
-
+import re
 
 
 
@@ -172,8 +172,8 @@ def main():
 
         save_directory = os.path.join(settings.save_directory_manual, subject)
 
-        if not os.path.exists(save_directory):
-            os.makedirs(save_directory)
+        # if not os.path.exists(save_directory):
+        #     os.makedirs(save_directory)
 
         file_name = file_name + '.pdf'
         save_path = os.path.join(save_directory, file_name)
@@ -295,7 +295,16 @@ def main():
         #utils.create_csv(global_df_wm, save_directory + '/global_trials_wm.csv')
 
         # Filter for early training tasks
-        early_training_tasks = ['TouchTeaching', 'Habituation', 'LickTeaching']
+        # ---------------------------------------------------------------
+        # build the list of “early-training” tasks automatically
+        # (i.e. every task whose name does NOT contain “Probability”
+        #  or “Cognitive_Bias”, case-insensitive)
+        # ---------------------------------------------------------------
+        exclude = re.compile(r'probability|cognitive_bias', re.I)
+        early_training_tasks = [
+            t for t in global_df['task'].dropna().unique()
+            if not exclude.search(t)
+        ]
         global_df_early = global_df[
             global_df['task'].str.contains('|'.join(early_training_tasks), case=False, na=False)].copy()
         utils.create_csv(global_df_early, os.path.join(save_directory, 'early_training_rv1.csv'))
