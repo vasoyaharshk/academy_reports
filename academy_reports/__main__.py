@@ -273,15 +273,15 @@ def main():
         #     os.makedirs(save_directory)
         # utils.create_csv(global_df, save_directory + '/global_trials.csv')
 
+        # Delete all files in the save_directory (as string)
+        for filename in os.listdir(save_directory):
+            file_path = os.path.join(save_directory, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+
         # File paths
         global_trials_pi_file = os.path.join(save_directory, 'global_trials_pi_rv1.csv')
         global_trials_wm_file = os.path.join(save_directory, 'global_trials_wm_rv1.csv')
-
-        # Delete existing files if they exist
-        #for file in [global_trials_pi_file, global_trials_wm_file]:
-        for file in [global_trials_pi_file]:
-            if os.path.exists(file):
-                os.remove(file)
 
         # Save the full global dataframe
         # utils.create_csv(global_df, global_trials_file)
