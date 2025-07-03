@@ -309,7 +309,7 @@ def main():
             global_df['task'].str.contains('|'.join(early_training_tasks), case=False, na=False)].copy()
         utils.create_csv(global_df_early, os.path.join(save_directory, 'early_training_rv1.csv'))
 
-        print('END!')
+        print('GLOBAL TRIALS COMPLETED')
 
     # # Load R scripts for Harsh_RV1_Data_Sorting and Harsh_RV1_Progress
     # def load_r_scripts():
