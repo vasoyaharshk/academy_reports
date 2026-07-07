@@ -280,8 +280,8 @@ def main():
                 os.remove(file_path)
 
         # File paths
-        global_trials_pi_file = os.path.join(save_directory, 'global_trials_pi_rv2.csv')
-        global_trials_wm_file = os.path.join(save_directory, 'global_trials_wm_rv2.csv')
+        global_trials_pi_file = os.path.join(save_directory, 'global_trials_pi_rv3.csv')
+        global_trials_wm_file = os.path.join(save_directory, 'global_trials_wm_rv3.csv')
 
         # Save the full global dataframe
         # utils.create_csv(global_df, global_trials_file)
@@ -307,7 +307,7 @@ def main():
         ]
         global_df_early = global_df[
             global_df['task'].str.contains('|'.join(early_training_tasks), case=False, na=False)].copy()
-        utils.create_csv(global_df_early, os.path.join(save_directory, 'early_training_rv2.csv'))
+        utils.create_csv(global_df_early, os.path.join(save_directory, 'early_training_rv3.csv'))
 
         print('END!')
 
