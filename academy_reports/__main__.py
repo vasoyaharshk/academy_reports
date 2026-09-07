@@ -287,7 +287,8 @@ def main():
         # utils.create_csv(global_df, global_trials_file)
 
         # Filter for tasks that contain 'Probability'
-        global_df_pi = global_df[global_df['task'].str.contains('Probability', case=False, na=False)].copy()
+        global_df_pi = global_df[global_df['task'].str.contains(r'Probability|Cognitive_Bias', case=False, na=False)].copy()
+        # global_df_pi = global_df[global_df['task'].str.contains('Probability', case=False, na=False)].copy()
         utils.create_csv(global_df_pi, global_trials_pi_file)
 
         # Filter for tasks that do NOT contain 'Probability': Working Memory
